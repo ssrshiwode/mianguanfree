@@ -1,0 +1,5 @@
+$width: 375;
+@function format-vw($px) {
+  @return $px / $width * 100vw
+}
+$marginCol: format-vw(20);
