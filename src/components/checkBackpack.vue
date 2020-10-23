@@ -25,7 +25,7 @@ export default {
   background: #000000;
   opacity: 0.7;
 }
-#backpack {
+.backpack {
   position: fixed;
   top: 0;
   left: 0;

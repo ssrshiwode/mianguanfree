@@ -9,7 +9,7 @@
 <script>
 import gameStorage from "@/utils/gameStorage.js";
 export default {
-  name: "getBackbackAlert",
+  name: "getBackpackAlert",
   props: ["attachment"],
   data() {
     return {

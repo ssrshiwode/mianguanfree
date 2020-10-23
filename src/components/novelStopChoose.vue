@@ -6,9 +6,19 @@
 </template>
 
 <script>
+import { appSubmit } from "@/api/index.js";
 export default {
   name: "novelStopChoose",
-  props: [],
+  props: ["moduleId", "userId", "gameId"],
+  mounted() {
+    appSubmit(this.userId, this.gameId, this.moduleId, 0)
+      .then(data => {
+        let result = data.data;
+        result = result.filter(d => !d.passed);
+        this.$emit("novelStopChooseCallback", result);
+      })
+      .catch(error => console.log(error));
+  },
   data() {
     return {
       novelStopChooseIcon: require("@/assets/novelStopChooseIcon.png")

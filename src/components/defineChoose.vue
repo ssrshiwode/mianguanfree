@@ -73,7 +73,7 @@ export default {
     span {
       display: block;
       width: format-vw(262);
-      height: format-vw(50);
+      // height: format-vw(50);
       margin: $marginCol auto;
       background: #3b3b3b;
       border-radius: 5px;

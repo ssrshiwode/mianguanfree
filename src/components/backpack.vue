@@ -11,7 +11,10 @@
         class="res"
         v-for="res in resList"
         :key="res.propId"
-        @click="checkRes = res"
+        @click="
+          checkRes = res;
+          showCheckRes = true;
+        "
       >
         <img :src="res.url" alt="load fail" v-if="!!res.url" />
         <div class="placeholder" v-else></div>
@@ -54,6 +57,7 @@ export default {
             data.forEach(d => {
               d.url = this.parseImgUrl(d.url);
             });
+            this.resList = data;
           })
           .catch(error => console.log(error));
       }

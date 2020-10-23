@@ -18,7 +18,7 @@ import toApp from "@/components/toApp";
 import hint from "@/components/hint";
 import backpack from "@/components/backpack";
 import checkBackback from "@/components/checkBackpack";
-import getBackbackAlert from "@/components/getBackpackAlert";
+import getBackpackAlert from "@/components/getBackpackAlert";
 
 export default {
   richText,
@@ -41,5 +41,5 @@ export default {
   hint,
   backpack,
   checkBackback,
-  getBackbackAlert
+  getBackpackAlert
 };

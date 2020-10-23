@@ -22,7 +22,8 @@
           v-bind="ceil"
           @appSubmitCallback="appSubmitCallback"
           @appSubmitCallbackError="appSubmitCallbackError"
-          @hintCancel="removeParser"
+          @hint-cancel="removeParser"
+          @novelStopChooseCallback="novelStopChooseCallback"
         />
       </div>
       <div style="height:20vh;width:100vw"><!-- 底部占位 --></div>
@@ -89,7 +90,7 @@ export default {
         "inputSetPaintingTalk",
         "richTextAlert",
         "hint",
-        "getBackPackalert"
+        "getBackpackAlert"
       ],
       backpackShow: false,
       keyCount: 0
@@ -296,6 +297,10 @@ export default {
           break;
         case "hint":
           break;
+        case "novelStopChoose":
+          currentModule.userId = this.userId;
+          currentModule.gameId = this.gameId;
+          break;
         case "award":
           currentModule.type = "getBackpackAlert";
           break;
@@ -329,6 +334,11 @@ export default {
     },
     appSubmitCallbackError(data) {
       this.gameProcessShow.push(data);
+    },
+    novelStopChooseCallback(data) {
+      if (!data || data.length === 0) return;
+      this.gameProcessIndex = 0;
+      this.gameProcess = data.map(this.moduleParser);
     },
     // 组件添加动画，滑倒底部
     addAnimation() {

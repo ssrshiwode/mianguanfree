@@ -7,7 +7,7 @@ switch (getParams("env")) {
     baseURL = "http://localhost:3304";
     break;
   case "dev":
-    baseURL = "https://t1.itaotuo.com/puzzle-server/";
+    baseURL = "https://t1.itaotuo.com/puzzle/";
     break;
   case "pro":
     baseURL = "https://game.itaotuo.com/puzzle-manager/";
