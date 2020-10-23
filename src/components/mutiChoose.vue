@@ -1,26 +1,40 @@
 <template>
-  <div id="mutiChoose">
+  <div id="mutiChoose" @click.stop>
     <template v-for="question in keys">
       <div :key="question" class="checkbox">
         <span class="context">{{ question }}</span>
         <label>
-          <input type="checkbox" :value="question" v-model="checkedValue" />
+          <input
+            type="checkbox"
+            :value="question"
+            v-model="checkedValue"
+            :disabled="isAnswer"
+          />
           <span></span>
         </label>
       </div>
     </template>
-    <button @click="submit()">提交</button>
+    <button @click="submit()" :disabled="isAnswer">提交</button>
   </div>
 </template>
 <script>
 import { appSubmit } from "@/api/index.js";
 export default {
   name: "mutiChoose",
-  props: ["keys", "moduleId", "userId", "gameId"],
+  props: ["keys", "moduleId", "userId", "gameId", "checkedV"],
   data() {
     return {
-      checkedValue: []
+      checkedValue: [],
+      isAnswer: false
     };
+  },
+  created() {
+    if (this.checkedV) {
+      this.isAnswer = true;
+      for (let v of this.checkedV.split(",")) {
+        this.checkedValue.push(this.keys[parseInt(v)]);
+      }
+    }
   },
   methods: {
     async submit() {
@@ -29,6 +43,7 @@ export default {
         for (let v of this.checkedValue) {
           chooseAnswer.push(this.keys.indexOf(v));
         }
+        chooseAnswer.sort();
         let result = await appSubmit(
           this.userId,
           this.gameId,

@@ -2,7 +2,8 @@
   <div id="talk">
     <div :class="talkClass" v-if="!!talk">
       <div class="head">
-        <img :src="talk.headImg" alt="load fail" />
+        <img :src="talk.headImg" alt="load fail" v-if="!!talk.headImg" />
+        <div class="placeholder" v-else></div>
       </div>
       <div class="content">
         <p>{{ talk.name }}</p>
@@ -36,14 +37,16 @@ export default {
       headImg: "",
       name: ""
     };
-    talkPeople.nameArray
-      ? (this.talk.name = talkPeople.nameArray[this.nameIndex])
-      : (this.talk.name = talkPeople.name);
-    talkPeople.headImageArray
-      ? (this.talk.headImg = this.parseImgUrl(
-          talkPeople.headImageArray[parseInt(this.nameHeadIndex)]
-        ))
-      : (this.talk.headImg = this.parseImgUrl(talkPeople.headImage));
+    if (this.speaker) {
+      talkPeople.nameArray
+        ? (this.talk.name = talkPeople.nameArray[this.nameIndex])
+        : (this.talk.name = talkPeople.name);
+      talkPeople.headImageArray
+        ? (this.talk.headImg = this.parseImgUrl(
+            talkPeople.headImageArray[parseInt(this.nameHeadIndex)]
+          ))
+        : (this.talk.headImg = this.parseImgUrl(talkPeople.headImage));
+    }
   },
   methods: {
     parseImgUrl(str) {
@@ -72,11 +75,20 @@ export default {
         height: format-vw(40);
         border-radius: 50%;
       }
+
+      .placeholder {
+        width: format-vw(40);
+        height: format-vw(40);
+        border-radius: 50%;
+        background: black;
+        border: 1px solid #ffffff;
+      }
     }
 
     .content {
-      width: format-vw(232);
+      max-width: format-vw(232);
       p {
+        height: 15px;
         font-size: 11px;
         color: #ffffff;
         line-height: 15px;
@@ -85,7 +97,7 @@ export default {
       }
       div {
         border-radius: 5px;
-        background: #333333;
+        background: rgba(255, 255, 255, 0.15);
         font-size: 16px;
         line-height: 22px;
         letter-spacing: 0.4px;

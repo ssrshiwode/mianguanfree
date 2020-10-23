@@ -2,38 +2,20 @@
   <div id="defineVideo">
     <video
       class="normal-video"
-      src="https://resource.itaotuo.com/gugong2/videos/Introduction.mp4"
+      :src="videoUrl"
       controls
       preload
+      v-if="renderType === 'video'"
     >
       加载失败
     </video>
-    <div class="npc">
+    <div :class="talk.class" v-if="renderType !== 'video' && !!talk">
       <div class="left">
-        <img src="https://resource.itaotuo.com/logo.png" alt="load fail" />
+        <img :src="talk.headImg" alt="load fail" />
       </div>
       <div class="right">
-        <p>阿拉蕾</p>
-        <video
-          src="https://resource.itaotuo.com/gugong2/videos/Introduction.mp4"
-          controls
-          preload
-        >
-          加载失败
-        </video>
-      </div>
-    </div>
-    <div class="host">
-      <div class="left">
-        <img src="https://resource.itaotuo.com/logo.png" alt="load fail" />
-      </div>
-      <div class="right">
-        <p>六六</p>
-        <video
-          src="https://resource.itaotuo.com/gugong2/videos/Introduction.mp4"
-          controls
-          preload
-        >
+        <p>{{ talk.name }}</p>
+        <video :src="videoUrl" controls preload>
           加载失败
         </video>
       </div>
@@ -42,8 +24,49 @@
 </template>
 
 <script>
+import gameStorage from "@/utils/gameStorage.js";
 export default {
-  name: "defineVideo"
+  name: "defineVideo",
+  props: ["value", "speaker", "nameHeadIndex", "nameIndex"],
+  data() {
+    return {
+      renderType: "",
+      talk: null,
+      videoUrl: ""
+    };
+  },
+  mounted() {
+    this.game = gameStorage.get();
+    this.videoUrl = this.parseImgUrl(this.value);
+    if (!this.speaker) {
+      this.renderType = "video";
+      return;
+    }
+    this.talk = {
+      headImg: "",
+      name: "",
+      class: "npc"
+    };
+    if (this.speaker == "玩家" || this.speaker == "player_default")
+      this.talk.class = "host";
+    else this.talk.class = "npc";
+    let talkPeople = this.game.data.props[this.speaker];
+    talkPeople.nameArray
+      ? (this.talk.name = talkPeople.nameArray[this.nameIndex])
+      : (this.talk.name = talkPeople.name);
+    talkPeople.headImageArray
+      ? (this.talk.headImg = this.parseImgUrl(
+          talkPeople.headImageArray[parseInt(this.nameHeadIndex)]
+        ))
+      : (this.talk.headImg = this.parseImgUrl(talkPeople.headImage));
+  },
+  methods: {
+    parseImgUrl(str) {
+      let resourcePrefix = this.game.others.resourcePrefix;
+      let name = this.game.others.resources[str].name;
+      return resourcePrefix + name;
+    }
+  }
 };
 </script>
 

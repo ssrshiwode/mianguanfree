@@ -12,6 +12,13 @@ import novelStopChoose from "@/components/novelStopChoose";
 import defineVideo from "@/components/defineVideo";
 import defineAudio from "@/components/defineAudio";
 import inputSetPaintingTalk from "@/components/inputSetPaintingTalk";
+import popupNewWindow from "@/components/popupNewWindow";
+import gameDetail from "@/components/gameDetail";
+import toApp from "@/components/toApp";
+import hint from "@/components/hint";
+import backpack from "@/components/backpack";
+import checkBackback from "@/components/checkBackpack";
+import getBackbackAlert from "@/components/getBackpackAlert";
 
 export default {
   richText,
@@ -27,5 +34,12 @@ export default {
   novelStopChoose,
   defineVideo,
   defineAudio,
-  inputSetPaintingTalk
+  inputSetPaintingTalk,
+  popupNewWindow,
+  gameDetail,
+  toApp,
+  hint,
+  backpack,
+  checkBackback,
+  getBackbackAlert
 };

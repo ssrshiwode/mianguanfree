@@ -47,8 +47,27 @@ export default {
         if (result.data && Array.isArray(result.data))
           data = result.data.filter(d => !d.passed);
         this.$emit("appSubmitCallback", data);
+        this.isAnswer = true;
       } catch (error) {
         console.log(error);
+        if (this.errorValue && this.errorModule.speaker)
+          this.$emit("appSubmitCallbackError", {
+            type: this.errorModule.type,
+            speaker: this.errorModule.speaker,
+            nameHeadIndex: this.errorModule.nameHeadIndex,
+            nameIndex: this.errorModule.nameIndex,
+            value: this.errorValue,
+            key: "error-alert-" + Date.now()
+          });
+        if (this.errorValue && !this.errorModule.speaker)
+          this.$emit("appSubmitCallbackError", {
+            type: this.errorModule.type,
+            speaker: "player_default",
+            nameHeadIndex: "0",
+            nameIndex: 0,
+            value: this.errorValue,
+            key: "error-alert-" + Date.now()
+          });
       }
     }
   }

@@ -1,5 +1,5 @@
 <template>
-  <div id="chooseSetPaintingTalk">
+  <div id="chooseSetPaintingTalk" @click.stop>
     <div class="shady"></div>
     <div class="content" v-if="!!talk">
       <img

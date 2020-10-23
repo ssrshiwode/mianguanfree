@@ -1,6 +1,6 @@
 <template>
   <div id="richTextAlert">
-    <p>这是一个弹窗！</p>
+    <p>{{ value }}</p>
   </div>
 </template>
 

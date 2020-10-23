@@ -1,6 +1,6 @@
 import request from "@/utils/request";
-
-export function initGame(userId, gameId, env = "debug") {
+let defaultEnv = "debug";
+export function initGame(userId, gameId, env = defaultEnv) {
   if (!userId || !gameId) return Promise.reject("params error");
   return request({
     url: "/game/H5/free/appGameData",
@@ -13,7 +13,7 @@ export function initGame(userId, gameId, env = "debug") {
   });
 }
 
-export function initGamewithNoGameData(userId, gameId, env = "debug") {
+export function initGamewithNoGameData(userId, gameId, env = defaultEnv) {
   if (!userId || !gameId) return Promise.reject("params error");
   return request({
     url: "/game/H5/free/appGameDataWithNoGameData",
@@ -26,7 +26,7 @@ export function initGamewithNoGameData(userId, gameId, env = "debug") {
   });
 }
 
-export function appSubmit(userId, gameId, moduleId, value, env = "debug") {
+export function appSubmit(userId, gameId, moduleId, value, env = defaultEnv) {
   if (!userId || !gameId || !moduleId) return Promise.reject("params error");
   return request({
     url: "/game/H5/free/appSubmit",
@@ -37,6 +37,29 @@ export function appSubmit(userId, gameId, moduleId, value, env = "debug") {
       moduleId,
       value,
       env
+    }
+  });
+}
+
+export function getGameDetail(gameId) {
+  if (!gameId) return Promise.reject("params error");
+  return request({
+    url: "/game/H5/getGameDetailByGameId",
+    method: "get",
+    params: {
+      gameId
+    }
+  });
+}
+
+export function getBackpack(userId, gameId) {
+  if (!userId || !gameId) return Promise.reject("params error");
+  return request({
+    url: "/game/H5/free/getUserGameBag",
+    method: "get",
+    params: {
+      userId,
+      gameId
     }
   });
 }

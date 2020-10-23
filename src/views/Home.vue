@@ -1,6 +1,6 @@
 <template>
-  <div id="app">
-    <div id="header" :class="{ show: headerAndFooterShow }">
+  <div id="app" :style="setBackground">
+    <div id="header" :class="{ show: headerAndFooterShow }" @click.stop>
       <img :src="hint.icon" alt="load fail" @click="hintHandler()" />
       <img
         :src="backgroundMusic.icon"
@@ -15,17 +15,34 @@
       @click="playGame()"
       ref="ceil"
     >
-      <div class="ceil" v-for="ceil in gameProcessShow" :key="ceil.key">
+      <gameDetail :gameId="gameId" />
+      <div class="ceil" v-for="ceil in gameProcessShow" :key="ceil.key" v-cloak>
         <component
           :is="ceil.type"
           v-bind="ceil"
           @appSubmitCallback="appSubmitCallback"
+          @appSubmitCallbackError="appSubmitCallbackError"
+          @hintCancel="removeParser"
         />
       </div>
+      <div style="height:20vh;width:100vw"><!-- 底部占位 --></div>
     </div>
-    <div id="footer" :class="{ show: headerAndFooterShow }">
-      <img :src="backpackIcon" alt="load fail" />
+    <div id="footer" :class="{ show: headerAndFooterShow }" @click.stop>
+      <img
+        class="icon"
+        :src="backpackIcon"
+        alt="load fail"
+        @click="backpackShow = !backpackShow"
+      />
     </div>
+    <backpack
+      class="backpack"
+      :class="{ show: backpackShow }"
+      :userId="userId"
+      :gameId="gameId"
+      :backpackShow="backpackShow"
+      @hide-backpack="backpackShow = false"
+    />
   </div>
 </template>
 
@@ -36,6 +53,7 @@ import storage from "@/utils/storage.js";
 import getParams from "@/utils/params.js";
 import gameStorage from "@/utils/gameStorage.js";
 import clone from "@/utils/clone.js";
+import anime from "animejs";
 
 export default {
   data() {
@@ -57,19 +75,31 @@ export default {
         icon: require("@/assets/背景音乐开.png")
       },
       hint: {
-        switch: false,
+        value: null,
         icon: require("@/assets/提示.png")
       },
-      appSubmit: {
-        isSubmit: false,
-        response: ""
-      }
+      backgroundImage: require("@/assets/默认背景.png"),
+      setBackground: {
+        backgroundImage: ""
+      },
+      canPopComponentType: [
+        "setPaintingTalk",
+        "chooseSetPaintingTalk",
+        "mutiChooseSetPaintingTalk",
+        "inputSetPaintingTalk",
+        "richTextAlert",
+        "hint",
+        "getBackPackalert"
+      ],
+      backpackShow: false,
+      keyCount: 0
     };
   },
   components: {
     ...defineComponent
   },
   created() {
+    this.setBackground.backgroundImage = `url(${this.backgroundImage})`;
     if (!storage.get("userId")) {
       this.userId =
         Date.now().toString(36) +
@@ -90,10 +120,7 @@ export default {
       initGamewithNoGameData(this.userId, this.gameId)
         .then(d => {
           console.log(d);
-          if (d.userGame.totalData || Array.isArray(d.userGame.totalData))
-            this.gameProcess = d.userGame.totalData.filter(
-              d => d.type !== "inputSetPaintingTalk"
-            );
+          this.totalDataHandler(d.userGame.totalData);
         })
         .catch(e => {
           console.log(e);
@@ -103,11 +130,8 @@ export default {
         .then(d => {
           console.log(d);
           this.game = d.game;
-          if (d.userGame.totalData || Array.isArray(d.userGame.totalData))
-            this.gameProcess = d.userGame.totalData.filter(
-              d.type !== "inputSetPaintingTalk"
-            );
           this.gameModules = this.game.data.modules;
+          this.totalDataHandler(d.userGame.totalData);
           gameStorage.set(this.game);
           storage.set("gameId", this.gameId);
           storage.set("game", JSON.stringify(d.game));
@@ -131,30 +155,78 @@ export default {
     // 推进游戏流程
     playGame() {
       this.headerAndFooterShow = false;
+      this.backpackShow = false;
       if (
         !this.gameProcess ||
         !Array.isArray(this.gameProcess) ||
         this.gameProcess.length === 0
       )
         return;
+      this.removeParser();
       // index索引到了最后一个就不再往下推了
       if (this.gameProcessIndex === this.gameProcess.length) return;
-      let currentProcess = this.gameProcess[this.gameProcessIndex];
-      // 对type为stop做跳过处理
-      if (
-        currentProcess.type &&
-        currentProcess.type === "stop" &&
-        this.gameProcessIndex !== this.gameProcess.length - 1
-      ) {
-        this.gameProcessIndex++;
-        currentProcess = this.gameProcess[this.gameProcessIndex];
-      }
-      // 遇到答案提交并且未提交答案时停止推进游戏流程
-      if (this.appSubmitHandler() === "fail") return;
-      this.removeParser();
-      this.moduleParser(currentProcess);
-      this.addAnimation();
+      this.gameProcessShowHandler();
+    },
+    // 将gameProcess中的数据推入gameProcessShow中
+    gameProcessShowHandler() {
+      let currentModule = this.gameProcess[this.gameProcessIndex];
       this.gameProcessIndex++;
+      let type = currentModule.type;
+      switch (type) {
+        case "chapter":
+          // 背景图片设置
+          if (currentModule.backgroundImage) {
+            this.setBackground.backgroundImage = `url(${this.parseImgUrl(
+              currentModule.backgroundImage
+            )})`;
+          }
+          return;
+        case "hint":
+          // 提示设置
+          this.hint.value = currentModule.value;
+          return;
+        case "getBackpackAlert":
+          if (
+            currentModule.attachment[0].key.indexOf("prop") === -1 &&
+            currentModule.attachment[0].key.indexOf("image") === -1
+          )
+            return;
+          break;
+        default:
+          break;
+      }
+      this.gameProcessShow.push(currentModule);
+      this.addAnimation();
+    },
+    // 渲染用户历史数据
+    playGameHistory() {
+      let gameprocessTemp = [];
+      for (let currentModule of this.gameProcess) {
+        let type = currentModule.type;
+        if (type === "chapter") {
+          // 背景图片设置
+          if (currentModule.backgroundImage) {
+            this.setBackground.backgroundImage = `url(${this.parseImgUrl(
+              currentModule.backgroundImage
+            )})`;
+          }
+          continue;
+        }
+        if (
+          type === "getBackpackAlert" &&
+          currentModule.attachment[0].key.indexOf("prop") === -1 &&
+          currentModule.attachment[0].key.indexOf("image") === -1
+        )
+          continue;
+        if (type === "hint") {
+          this.hint.value = currentModule.value;
+          continue;
+        }
+        gameprocessTemp.push(currentModule);
+      }
+      this.gameProcessShow = gameprocessTemp;
+      this.addAnimation();
+      this.gameProcessIndex = this.gameProcess.length;
     },
     // module解析器
     moduleParser(currentProcess) {
@@ -163,8 +235,10 @@ export default {
       const currentModule = clone(this.gameModules[id]);
       switch (type) {
         case "chapter":
-          return;
+          break;
         case "richText":
+          if (currentModule.name === "system")
+            currentModule.type = "richTextAlert";
           break;
         case "input":
           currentModule.userId = this.userId;
@@ -179,7 +253,11 @@ export default {
           currentModule.gameId = this.gameId;
           break;
         case "setPaintingTalk":
-          currentModule.type = "setPaintingTalk";
+          if (!currentModule.speaker) {
+            currentModule.speaker = "player_default";
+            currentModule.nameHeadIndex = "0";
+            currentModule.nameIndex = 0;
+          }
           break;
         case "choose":
           currentModule.userId = this.userId;
@@ -192,6 +270,9 @@ export default {
         case "mutiChoose":
           currentModule.userId = this.userId;
           currentModule.gameId = this.gameId;
+          if (typeof currentProcess.value === "string")
+            currentModule.checkedV = currentProcess.value;
+          else currentModule.checkedV = null;
           break;
         case "chooseSetPaintingTalk":
           currentModule.userId = this.userId;
@@ -202,65 +283,103 @@ export default {
         case "image":
           currentModule.type = "defineImage";
           break;
+        case "gif":
+          currentModule.type = "defineImage";
+          break;
+        case "audio":
+          currentModule.type = "defineAudio";
+          break;
+        case "video":
+          currentModule.type = "defineVideo";
+          break;
+        case "popupNewWindow":
+          break;
+        case "hint":
+          break;
+        case "award":
+          currentModule.type = "getBackpackAlert";
+          break;
+        case "DemoMainTaskFinished":
+          currentModule.type = "toApp";
+          currentModule.gameId = this.gameId;
+          console.log("游戏试玩结束");
+          break;
         default:
+          currentModule.type = "toApp";
+          currentModule.gameId = this.gameId;
           console.log(`未知类型:${type}`);
-          return;
+          break;
       }
-      currentModule.key = currentModule.moduleId + "-" + Date.now();
-      this.gameProcessShow.push(currentModule);
+      this.keyCount++;
+      currentModule.key = currentModule.moduleId + "-" + this.keyCount;
+      return currentModule;
     },
     // 对立绘等组件组移除处理
     removeParser() {
       if (this.gameProcessShow.length === 0) return;
       let { type } = this.gameProcessShow[this.gameProcessShow.length - 1];
-      switch (type) {
-        case "setPaintingTalk":
-          this.gameProcessShow.pop();
-          break;
-        case "chooseSetPaintingTalk":
-          this.gameProcessShow.pop();
-          break;
-        case "inputSetPaintingTalk":
-          this.gameProcessShow.pop();
-          break;
-        default:
-          break;
-      }
-    },
-    // 答案提交相关组件处理
-    // success:已成功 fail:未提交 notSubmit:还没遇到答案提交
-    appSubmitHandler() {
-      if (this.gameProcessShow.length === 0) return;
-      let { type } = this.gameProcessShow[this.gameProcessShow.length - 1];
-      switch (type) {
-        case "input":
-          if (this.appSubmit.isSubmit) return "success";
-          else return "fail";
-        default:
-          this.appSubmit.isSubmit = false;
-      }
+      if (this.canPopComponentType.indexOf(type) !== -1)
+        this.gameProcessShow.pop();
     },
     appSubmitCallback(data) {
-      this.appSubmit.isSubmit = true;
+      if (!data || data.length === 0) return;
       this.gameProcessIndex = 0;
-      this.gameProcess = data;
-      this.removeParser();
+      this.gameProcess = data.map(this.moduleParser);
       this.playGame();
+    },
+    appSubmitCallbackError(data) {
+      this.gameProcessShow.push(data);
     },
     // 组件添加动画，滑倒底部
     addAnimation() {
       const ceil = this.$refs.ceil;
       this.$nextTick(() => {
-        const afterScrollHeight = ceil.scrollHeight;
-        ceil.scrollTop = afterScrollHeight;
+        anime({
+          targets: "#container",
+          scrollTop: ceil.scrollHeight - ceil.clientHeight,
+          easing: "easeInOutExpo",
+          duration: 1000
+        });
       });
     },
-    hintHandler() {},
+    hintHandler() {
+      if (!this.hint.value) return;
+      this.gameProcessShow.push({
+        type: "hint",
+        key: "hint",
+        value: this.hint.value
+      });
+    },
     backgroundMusicHandler() {
       this.backgroundMusic.switch = !this.backgroundMusic.switch;
       this.backgroundMusic.switch
         ? (this.backgroundMusic.icon = this.backgroundMusic.openIcon)
         : (this.backgroundMusic.icon = this.backgroundMusic.closeIcon);
+    },
+    parseImgUrl(str) {
+      let resourcePrefix = this.game.others.resourcePrefix;
+      let name = this.game.others.resources[str].name;
+      return resourcePrefix + name;
+    },
+    //totalData处理函数，解析用户记录和删除特定类型的组件
+    //数据转换
+    totalDataHandler(totalData) {
+      if (!totalData || !Array.isArray(totalData)) return;
+      let needPlayGameHistory = false;
+      // 用户有游戏记录，直接渲染到最后
+      if (totalData.filter(d => d.type === "stop").length > 1)
+        needPlayGameHistory = true;
+      totalData = totalData.filter(
+        (d, index) => index === totalData.length - 1 || d.type !== "stop"
+      );
+      this.gameProcess = totalData.map(this.moduleParser);
+      // 过滤类似弹出的组件记录
+      this.gameProcess = this.gameProcess.filter(
+        (d, index) =>
+          index === this.gameProcess.length - 1 ||
+          this.canPopComponentType.indexOf(d.type) === -1
+      );
+      if (needPlayGameHistory) this.playGameHistory();
     }
   }
 };
@@ -274,15 +393,13 @@ export default {
   right: 0;
   bottom: 0;
   overflow: hidden;
-  background-image: url("https://resource.itaotuo.com/puzzle/games/D51IQC0@00332/backgroundimg.png");
   background-position: center;
   background-size: cover;
 }
 
 #container {
   width: 100vw;
-  height: 70vh;
-  padding: 10vh 0 20vh 0;
+  height: 100%;
   overflow-y: auto;
 }
 
@@ -306,10 +423,10 @@ export default {
     height: format-vw(24);
     margin-right: format-vw(20);
   }
-}
 
-#header.show {
-  top: 0px;
+  &.show {
+    top: 0px;
+  }
 }
 
 #footer {
@@ -319,18 +436,33 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
+  z-index: 10;
 
   img {
     width: format-vw(28);
     height: format-vw(40);
   }
-}
 
-#footer.show {
-  bottom: 0px;
+  &.show {
+    bottom: 0px;
+  }
 }
 
 .cail {
   width: 100wv;
+}
+
+.backpack {
+  position: fixed;
+  bottom: -#{format-vw(236)};
+  transition: bottom 1s ease;
+
+  &.show {
+    bottom: format-vw(52);
+  }
+}
+
+[v-cloak] {
+  display: none;
 }
 </style>
