@@ -9,8 +9,9 @@
 import { appSubmit } from "@/api/index.js";
 export default {
   name: "novelStopChoose",
-  props: ["moduleId", "userId", "gameId"],
+  props: ["moduleId", "userId", "gameId", "needSubmit"],
   mounted() {
+    if (this.needSubmit === "cancel") return;
     appSubmit(this.userId, this.gameId, this.moduleId, 0)
       .then(data => {
         let result = data.data;

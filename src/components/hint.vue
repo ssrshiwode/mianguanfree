@@ -14,7 +14,11 @@
           <div class="swiper-slide" v-if="!!value['3'] && lock">
             {{ this.value["3"].text }}
           </div>
-          <div class="swiper-slide" v-else style="overflow:visible">
+          <div
+            class="swiper-slide"
+            v-if="!!value['3'] && !lock"
+            style="overflow:visible"
+          >
             <p>第三条提示涉及剧透，可能会影响您的游戏体验，是否继续查看？</p>
             <div class="button-list">
               <button>否</button>

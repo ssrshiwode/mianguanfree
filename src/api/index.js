@@ -1,5 +1,5 @@
 import request from "@/utils/request";
-let defaultEnv = "debug";
+let defaultEnv = "pro";
 export function initGame(userId, gameId, env = defaultEnv) {
   if (!userId || !gameId) return Promise.reject("params error");
   return request({

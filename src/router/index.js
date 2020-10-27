@@ -1,7 +1,9 @@
 import Vue from "vue";
 import VueRouter from "vue-router";
 
-import Home from "../views/Home.vue";
+import Game from "../views/game.vue";
+import GameDetail from "../views/game-detail.vue";
+import Home from "../views/home.vue";
 import Weixin from "../views/weixin";
 import Download from "../views/download";
 
@@ -26,6 +28,16 @@ const routes = [
     path: "/download",
     name: "Download",
     component: Download
+  },
+  {
+    path: "/game",
+    name: "Game",
+    component: Game
+  },
+  {
+    path: "/gameDetail",
+    name: "GameDetail",
+    component: GameDetail
   },
   {
     path: "*",

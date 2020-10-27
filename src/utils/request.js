@@ -6,14 +6,11 @@ switch (getParams("env")) {
   case "debug":
     baseURL = "http://localhost:3304";
     break;
-  case "dev":
+  case "test":
     baseURL = "https://t1.itaotuo.com/puzzle/";
     break;
-  case "pro":
-    baseURL = "https://game.itaotuo.com/puzzle-manager/";
-    break;
   default:
-    baseURL = "http://localhost:3304";
+    baseURL = "https://game.itaotuo.com/puzzle-manager/";
 }
 const service = axois.create({
   baseURL,

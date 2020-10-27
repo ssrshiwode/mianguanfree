@@ -68,6 +68,15 @@ export default {
             value: this.errorValue,
             key: "error-alert-" + Date.now()
           });
+        if (!this.errorValue)
+          this.$emit("appSubmitCallbackError", {
+            type: "setPaintingTalk",
+            speaker: "player_default",
+            nameHeadIndex: "0",
+            nameIndex: 0,
+            value: "答案错误",
+            key: "error-alert-" + Date.now()
+          });
       }
     }
   }
