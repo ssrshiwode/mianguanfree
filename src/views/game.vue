@@ -22,7 +22,7 @@
           v-bind="ceil"
           @appSubmitCallback="appSubmitCallback"
           @appSubmitCallbackError="appSubmitCallbackError"
-          @hint-cancel="removeParser"
+          @hint-cancel="gameProcessShow.pop()"
           @novelStopChooseCallback="novelStopChooseCallback"
         />
       </div>
@@ -94,7 +94,6 @@ export default {
         "mutiChooseSetPaintingTalk",
         "inputSetPaintingTalk",
         "richTextAlert",
-        "hint",
         "getBackpackAlert"
       ],
       backpackShow: false,
@@ -171,6 +170,12 @@ export default {
       this.removeParser();
       // index索引到了最后一个就不再往下推了
       if (this.gameProcessIndex === this.gameProcess.length) return;
+      // 遇到小说试玩结束卡点就不再继续推进游戏
+      if (
+        this.gameProcessIndex !== 0 &&
+        this.gameProcess[this.gameProcessIndex - 1].type === "toApp"
+      )
+        return;
       this.gameProcessShowHandler();
     },
     // 将gameProcess中的数据推入gameProcessShow中
@@ -228,6 +233,7 @@ export default {
         }
         if (type === "novelStopChoose") currentModule.needSubmit = "cancel";
         if (type === "undefinedComponent") continue;
+        if (type === "DemoMainTaskFinished") break;
         gameprocessTemp.push(currentModule);
       }
       this.gameProcessShow = gameprocessTemp;
@@ -398,13 +404,15 @@ export default {
         (d, index) => index === totalData.length - 1 || d.type !== "stop"
       );
       this.gameProcess = totalData.map(this.moduleParser);
-      // 过滤类似弹出的组件记录
-      this.gameProcess = this.gameProcess.filter(
-        (d, index) =>
-          index === this.gameProcess.length - 1 ||
-          this.canPopComponentType.indexOf(d.type) === -1
-      );
-      if (needPlayGameHistory) this.playGameHistory();
+      if (needPlayGameHistory) {
+        // 过滤类似弹出的组件记录
+        this.gameProcess = this.gameProcess.filter(
+          (d, index) =>
+            index === this.gameProcess.length - 1 ||
+            this.canPopComponentType.indexOf(d.type) === -1
+        );
+        this.playGameHistory();
+      }
     }
   }
 };

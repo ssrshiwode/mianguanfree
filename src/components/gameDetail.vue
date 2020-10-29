@@ -19,6 +19,7 @@
         </div>
       </div>
     </div>
+    <p class="point">点击屏幕空白处进行游戏</p>
   </div>
 </template>
 <script>
@@ -143,6 +144,14 @@ export default {
         }
       }
     }
+  }
+
+  .point {
+    text-align: center;
+    color: #dca354;
+    font-size: 10px;
+    letter-spacing: 0.25px;
+    line-height: 14px;
   }
 }
 </style>

@@ -34,6 +34,8 @@ export default {
       headImg: "",
       name: ""
     };
+    if (!this.nameHeadIndex) this.nameHeadIndex = "0";
+    if (!this.nameIndex) this.nameIndex = 0;
     let talkPeople = this.game.data.props[this.speaker];
     this.talk.name = talkPeople.nameArray[this.nameIndex];
     this.talk.headImg = this.parseImgUrl(
@@ -90,10 +92,12 @@ export default {
 
     .talk {
       width: format-vw(345);
+      height: format-vw(142);
       background: #131312;
       border-radius: 2px;
       font-size: 14px;
       color: #ffffff;
+      overflow-y: auto;
 
       p:first-of-type {
         line-height: 19px;

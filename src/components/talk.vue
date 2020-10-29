@@ -28,19 +28,25 @@ export default {
   },
   mounted() {
     this.game = gameStorage.get();
-    if (this.speaker == "玩家" || this.speaker == "player_default")
-      this.talkClass = "host";
-    else this.talkClass = "npc";
+    !this.speaker ? (this.speaker = "player_default") : null;
+    this.speaker == "玩家" || this.speaker == "player_default"
+      ? (this.talkClass = "host")
+      : (this.talkClass = "npc");
     this.resourcePrefix = this.game.others.resourcePrefix;
     let talkPeople = this.game.data.props[this.speaker];
     this.talk = {
       headImg: "",
       name: ""
     };
-    if (this.speaker) {
+    if (!this.nameIndex) this.talk.name = talkPeople.name;
+    else {
       talkPeople.nameArray
         ? (this.talk.name = talkPeople.nameArray[this.nameIndex])
         : (this.talk.name = talkPeople.name);
+    }
+    if (!this.nameHeadIndex)
+      this.talk.headImg = this.parseImgUrl(talkPeople.headImage);
+    else {
       talkPeople.headImageArray
         ? (this.talk.headImg = this.parseImgUrl(
             talkPeople.headImageArray[parseInt(this.nameHeadIndex)]
