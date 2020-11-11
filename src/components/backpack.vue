@@ -46,11 +46,9 @@ export default {
       showCheckRes: false
     };
   },
-  created() {
-    this.game = gameStorage.get();
-  },
   watch: {
     backpackShow() {
+      if (!this.game) this.game = gameStorage.get();
       if (this.backpackShow) {
         getBackpack(this.userId, this.gameId)
           .then(data => {

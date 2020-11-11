@@ -20,6 +20,7 @@ import backpack from "@/components/backpack";
 import checkBackback from "@/components/checkBackpack";
 import getBackpackAlert from "@/components/getBackpackAlert";
 import hotImage from "@/components/hotImage";
+import bgm from "@/components/bgm";
 
 export default {
   richText,
@@ -43,5 +44,6 @@ export default {
   backpack,
   checkBackback,
   getBackpackAlert,
-  hotImage
+  hotImage,
+  bgm
 };

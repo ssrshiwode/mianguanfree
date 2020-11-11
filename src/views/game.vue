@@ -44,6 +44,11 @@
       :backpackShow="backpackShow"
       @hide-backpack="backpackShow = false"
     />
+    <bgm
+      ref="music"
+      :data-value="backgroundMusic.value"
+      :data-switch="backgroundMusic.switch"
+    />
   </div>
 </template>
 
@@ -71,10 +76,11 @@ export default {
       headerAndFooterShow: false,
       backpackIcon: require("@/assets/背包.png"),
       backgroundMusic: {
-        switch: true,
+        switch: false,
         openIcon: require("@/assets/背景音乐开.png"),
         closeIcon: require("@/assets/背景音乐关.png"),
-        icon: require("@/assets/背景音乐开.png")
+        icon: require("@/assets/背景音乐关.png"),
+        value: null
       },
       hint: {
         value: {
@@ -124,7 +130,7 @@ export default {
       this.gameModules = this.game.data.modules;
       initGamewithNoGameData(this.userId, this.gameId)
         .then(d => {
-          console.log(d);
+          // console.log(d);
           this.totalDataHandler(d.userGame.totalData);
         })
         .catch(e => {
@@ -133,7 +139,7 @@ export default {
     } else {
       initGame(this.userId, this.gameId)
         .then(d => {
-          console.log(d);
+          // console.log(d);
           this.game = d.game;
           this.gameModules = this.game.data.modules;
           this.totalDataHandler(d.userGame.totalData);
@@ -183,6 +189,8 @@ export default {
       let currentModule = this.gameProcess[this.gameProcessIndex];
       this.gameProcessIndex++;
       let type = currentModule.type;
+      // 设置背景音乐音效
+      this.backgroundMusic.value = currentModule;
       switch (type) {
         case "chapter":
           // 背景图片设置
@@ -224,6 +232,8 @@ export default {
               currentModule.backgroundImage
             )})`;
           }
+          // 背景音乐设置
+          this.backgroundMusic.value = currentModule;
           continue;
         }
         if (type === "getBackpackAlert") continue;
@@ -383,9 +393,13 @@ export default {
     },
     backgroundMusicHandler() {
       this.backgroundMusic.switch = !this.backgroundMusic.switch;
-      this.backgroundMusic.switch
-        ? (this.backgroundMusic.icon = this.backgroundMusic.openIcon)
-        : (this.backgroundMusic.icon = this.backgroundMusic.closeIcon);
+      if (this.backgroundMusic.switch) {
+        this.backgroundMusic.icon = this.backgroundMusic.openIcon;
+        this.$refs.music.play();
+      } else {
+        this.backgroundMusic.icon = this.backgroundMusic.closeIcon;
+        this.$refs.music.pause();
+      }
     },
     parseImgUrl(str) {
       let resourcePrefix = this.game.others.resourcePrefix;
@@ -454,7 +468,7 @@ export default {
   img {
     width: format-vw(24);
     height: format-vw(24);
-    margin-right: format-vw(20);
+    padding: format-vw(7.5) format-vw(20) format-vw(7.5) 0;
   }
 
   &.show {

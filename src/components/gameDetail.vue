@@ -149,7 +149,7 @@ export default {
   .point {
     text-align: center;
     color: #dca354;
-    font-size: 10px;
+    font-size: 12px;
     letter-spacing: 0.25px;
     line-height: 14px;
   }
