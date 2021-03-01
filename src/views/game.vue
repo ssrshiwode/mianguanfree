@@ -243,7 +243,10 @@ export default {
         }
         if (type === "novelStopChoose") currentModule.needSubmit = "cancel";
         if (type === "undefinedComponent") continue;
-        if (type === "DemoMainTaskFinished") break;
+        if (type === "toApp") {
+          gameprocessTemp.push(currentModule);
+          break;
+        }
         gameprocessTemp.push(currentModule);
       }
       this.gameProcessShow = gameprocessTemp;
