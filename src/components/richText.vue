@@ -1,15 +1,21 @@
 <template>
   <div id="richText">
-    <p>{{ this.value }}</p>
+    <p v-html="this.richText"></p>
   </div>
 </template>
 
 <script>
+import RTParser from "@/utils/RTParser.js";
 export default {
   name: "richText",
   props: ["value"],
   data() {
-    return {};
+    return {
+      richText: null
+    };
+  },
+  created() {
+    this.richText = RTParser(this.value);
   }
 };
 </script>
